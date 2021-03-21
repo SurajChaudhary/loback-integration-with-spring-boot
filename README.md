@@ -9,3 +9,6 @@ https://stackoverflow.com/questions/36743386/accessing-the-application-propertie
 https://www.baeldung.com/spring-boot-logging
 
 https://dzone.com/articles/configuring-logback-with-spring-boot
+
+
+https://github.com/kishanjavatrainer/SpringBootLoggerWithLogback/blob/master/SpringBootLoggerWithLogback/src/main/resources/logback.xml
