@@ -1,3 +1,7 @@
 log:
   file:
     path: C:\Users\admin\IdeaProjects\logs
+
+spring:
+  profiles:
+    active: prod

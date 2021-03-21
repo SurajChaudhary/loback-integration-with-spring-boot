@@ -1,46 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
-<!--    <property name="LOGS" value="${log.file.path}" />-->
-    <springProperty scope="context" name="LOGS" source="log.file.path"/>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <springProperty scope="context" name="LOG_PATH" source="log.file.path"/>
 
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                %black(%d{dd-MM-yyyy}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
             </Pattern>
         </layout>
     </appender>
 
-    <appender name="RollingFile"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/spring-boot-logger.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
-        </encoder>
+    <logger name="com.devtalk.logback.demo" level="trace">
+        <appender-ref ref="Console" />
+    </logger>
 
-        <rollingPolicy
-                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+    <!-- config for STDOUT and SAVE-TO-FILE -->
+    <appender name="SAVE-TO-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/log_%d{dd-MM-yyyy}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M - %msg%n
+            </Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${LOG_PATH}/archived/log_%d{dd-MM-yyyy}.log
             </fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>10</maxHistory>
+<!--            <totalSizeCap>100MB</totalSizeCap>-->
+            <totalSizeCap>1KB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
-    <!-- LOG everything at INFO level -->
-    <root level="info">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </root>
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="SAVE-TO-FILE"/>
+        </root>
+        <logger name="com.devtalk.logback.demo" level="debug">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="SAVE-TO-FILE"/>
+        </logger>
+    </springProfile>
 
-    <!-- LOG "com.baeldung*" at TRACE level -->
-    <logger name="com.baeldung" level="trace" additivity="false">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="SAVE-TO-FILE"/>
+        </root>
+        <logger name="com.devtalk.logback.demo" level="error">
+            <appender-ref ref="SAVE-TO-FILE"/>
+        </logger>
+    </springProfile>
 
 </configuration>
